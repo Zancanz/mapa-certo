@@ -24,6 +24,66 @@ function makeDropzone(dropzone, input, label) {
   });
 }
 
+const MAX_MAP_FILE_SIZE = 30 * 1024 * 1024;
+const MAX_UNCOMPRESSED_SIZE = 150 * 1024 * 1024;
+const MAX_COMPRESSION_RATIO = 50;
+const REQUIRED_SHAPEFILE_FILES = ['.shp', '.shx', '.dbf'];
+const OPTIONAL_SHAPEFILE_FILES = ['.prj', '.cpg', '.sbn', '.sbx', '.qix', '.shp.xml'];
+
+const getZipEntries = async (file) => {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (bytes.length < 22) throw new Error('O arquivo não é um .zip válido.');
+  const view = new DataView(bytes.buffer);
+  const readUint32 = (offset) => view.getUint32(offset, true);
+  let endOffset = -1;
+  for (let offset = bytes.length - 22; offset >= Math.max(0, bytes.length - 65557); offset -= 1) {
+    if (readUint32(offset) === 0x06054b50) { endOffset = offset; break; }
+  }
+  if (endOffset < 0) throw new Error('O arquivo não é um .zip válido.');
+  const entriesCount = view.getUint16(endOffset + 10, true);
+  let offset = readUint32(endOffset + 16);
+  if (entriesCount > 20) throw new Error('O arquivo possui itens demais para um Shapefile.');
+  const decoder = new TextDecoder('utf-8');
+  const entries = [];
+  for (let index = 0; index < entriesCount; index += 1) {
+    if (readUint32(offset) !== 0x02014b50) throw new Error('A estrutura do .zip é inválida.');
+    const flags = view.getUint16(offset + 8, true);
+    const compressedSize = readUint32(offset + 20);
+    const uncompressedSize = readUint32(offset + 24);
+    const nameLength = view.getUint16(offset + 28, true);
+    const extraLength = view.getUint16(offset + 30, true);
+    const commentLength = view.getUint16(offset + 32, true);
+    const nameBytes = bytes.slice(offset + 46, offset + 46 + nameLength);
+    const name = decoder.decode(nameBytes);
+    if ((flags & 1) !== 0) throw new Error('Arquivos compactados com senha não são aceitos.');
+    if (name.includes('..') || name.startsWith('/') || name.includes('\\')) throw new Error('O .zip possui um caminho de arquivo inválido.');
+    if (uncompressedSize > MAX_UNCOMPRESSED_SIZE || (compressedSize > 0 && uncompressedSize / compressedSize > MAX_COMPRESSION_RATIO)) {
+      throw new Error('O .zip excede o limite de segurança de descompactação.');
+    }
+    entries.push(name);
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+  return entries.filter((name) => !name.endsWith('/'));
+};
+
+const validateShapefileZip = async (file) => {
+  if (!file || !file.name.toLowerCase().endsWith('.zip')) return 'Envie um Shapefile compactado em .zip.';
+  if (file.size > MAX_MAP_FILE_SIZE) return 'O arquivo deve ter no máximo 30 MB.';
+  const entries = await getZipEntries(file);
+  if (!entries.length) return 'O .zip está vazio.';
+  const names = entries.map((name) => name.split('/').pop().toLowerCase());
+  const extensions = names.map((name) => name.endsWith('.shp.xml') ? '.shp.xml' : name.slice(name.lastIndexOf('.')));
+  if (extensions.some((extension) => ![...REQUIRED_SHAPEFILE_FILES, ...OPTIONAL_SHAPEFILE_FILES].includes(extension))) {
+    return 'O .zip contém arquivos não permitidos. Envie somente os componentes do Shapefile.';
+  }
+  if (REQUIRED_SHAPEFILE_FILES.some((extension) => !extensions.includes(extension))) {
+    return 'O Shapefile precisa conter os arquivos .shp, .shx e .dbf.';
+  }
+  const stems = names.map((name) => name.replace(/\.shp\.xml$|\.[^.]+$/, ''));
+  if (new Set(stems).size !== 1) return 'Os arquivos do Shapefile devem ter o mesmo nome-base.';
+  return null;
+};
+
 const orderForm = document.querySelector('#orderForm');
 const modal = document.querySelector('#modal');
 const orderInput = document.querySelector('#mapFile');
@@ -48,15 +108,16 @@ if (orderInput && orderLabel) {
 }
 makeDropzone(document.querySelector('#dropzone'), orderInput, orderLabel);
 if (orderForm && modal) {
-  orderForm.addEventListener('submit', (event) => {
+  orderForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!orderForm.checkValidity()) {
       orderForm.reportValidity();
       return;
     }
     const mapFile = orderInput.files[0];
-    if (!mapFile || !mapFile.name.toLowerCase().endsWith('.zip')) {
-      orderLabel.textContent = 'Envie um Shapefile compactado em .zip';
+    const fileError = await validateShapefileZip(mapFile);
+    if (fileError) {
+      orderLabel.textContent = fileError;
       return;
     }
     modal.hidden = false;
