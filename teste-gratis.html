@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste grátis — MapaCerto</title>
+    <meta name="description" content="Experimente o fluxo de correção de mapas gratuitamente." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header container">
+      <a class="brand" href="index.html" aria-label="MapaCerto, página inicial"><span class="brand-mark">⌁</span>MapaCerto</a>
+      <nav aria-label="Navegação principal"><a href="index.html#como-funciona">Como funciona</a><a class="active-nav" href="teste-gratis.html">Teste grátis</a><a href="index.html#precos">Preços</a><a href="index.html#duvidas">Dúvidas</a></nav>
+      <a class="button button-small" href="index.html#pedido">Corrigir meu mapa</a>
+    </header>
+    <main class="trial-page">
+      <section class="trial-hero container">
+        <div><p class="eyebrow"><span></span> SEM CADASTRO E SEM CARTÃO</p><h1>Faça um <em>teste grátis</em><br />com seu mapa.</h1><p>Envie uma amostra e descreva uma alteração. Você verá como o pedido será organizado antes de contratar a revisão completa.</p></div>
+        <aside><span class="trial-spark">✦</span><strong>1 teste gratuito</strong><p>Use uma imagem de até 5 MB para conhecer o processo.</p></aside>
+      </section>
+      <section class="trial-workspace container">
+        <form class="trial-form" id="trialForm">
+          <div class="form-step"><span>1</span><h3>Adicione uma imagem de teste</h3></div>
+          <label class="dropzone" id="trialDropzone" for="trialFile"><input id="trialFile" type="file" accept=".jpg,.jpeg,.png" hidden /><span class="upload-icon">↥</span><strong id="trialFileLabel">Arraste uma imagem aqui</strong><small>ou clique para selecionar · PNG ou JPG, até 5 MB</small></label>
+          <div class="form-step"><span>2</span><h3>Escreva uma correção simples</h3></div>
+          <label for="trialInstructions" class="sr-only">Instruções de teste</label>
+          <textarea id="trialInstructions" required placeholder="Ex.: destaque a rota principal em laranja e corrija o nome da Avenida Central."></textarea>
+          <button class="button" type="submit">Gerar teste gratuito <span>→</span></button>
+          <p class="trial-disclaimer">Este teste cria uma prévia demonstrativa. Seu arquivo não será publicado.</p>
+        </form>
+        <section class="trial-result" aria-live="polite" id="trialResult">
+          <div class="result-empty" id="resultEmpty"><div class="empty-circle">⌁</div><h2>Sua prévia aparecerá aqui.</h2><p>Envie uma imagem e uma instrução para começar o teste.</p></div>
+          <div class="result-ready" id="resultReady" hidden>
+            <p class="eyebrow"><span></span> TESTE CONCLUÍDO</p><div class="result-map"><img id="previewImage" alt="Prévia do mapa enviado" /><div class="result-route"></div><span class="result-pin">●</span></div>
+            <h2>Prévia preparada.</h2><p id="resultCopy">A correção solicitada foi registrada para revisão.</p><a class="button" href="index.html#pedido">Quero a versão final <span>→</span></a>
+          </div>
+        </section>
+      </section>
+      <section class="trial-bottom"><div class="container"><p><strong>Gostou da experiência?</strong> No pedido completo, você recebe uma prévia para aprovação e o arquivo final após o pagamento.</p><a href="index.html#pedido">Iniciar pedido completo →</a></div></section>
+    </main>
+    <footer><div class="container footer-content"><a class="brand" href="index.html"><span class="brand-mark">⌁</span>MapaCerto</a><p>Mapas claros para decisões melhores.</p><span>© 2026 MapaCerto</span></div></footer>
+    <script src="script.js"></script>
+  </body>
+</html>
