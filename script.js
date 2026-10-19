@@ -104,7 +104,7 @@ if (orderInput && orderLabel) {
   style.textContent = `.client-request-fields{margin-bottom:29px}.client-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.client-field{display:flex;flex-direction:column;gap:6px;color:var(--ink);font-size:12px;font-weight:600}.client-field-wide{grid-column:1/-1}.client-field input{width:100%;border:1px solid #dfe3dc;padding:12px;color:var(--ink);font:13px var(--sans)}.client-field input:focus{outline:2px solid #dceadd;border-color:#668574}@media(max-width:760px){.client-fields-grid{grid-template-columns:1fr}.client-field-wide{grid-column:auto}}`;
   document.head.appendChild(style);
   orderLabel.textContent = 'Arraste seu Shapefile aqui';
-  orderLabel.nextElementSibling.textContent = 'ou clique para selecionar · somente Shapefile compactado (.zip)';
+  orderLabel.nextElementSibling.textContent = 'ou clique para selecionar · somente Shapefile compactado (.zip, até 30 MB)';
 }
 makeDropzone(document.querySelector('#dropzone'), orderInput, orderLabel);
 if (orderForm && modal) {
