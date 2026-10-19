@@ -33,8 +33,7 @@ if (orderInput && orderLabel) {
     <div class="client-request-fields">
       <div class="form-step"><span>1</span><h3>Seus dados</h3></div>
       <div class="client-fields-grid">
-        <label class="client-field client-field-wide"><span>Nome completo</span><input id="clientName" name="clientName" type="text" autocomplete="name" minlength="3" required placeholder="Digite seu nome completo" /></label>
-        <label class="client-field"><span>CPF</span><input id="clientCpf" name="clientCpf" type="text" inputmode="numeric" autocomplete="off" maxlength="14" required placeholder="000.000.000-00" /></label>
+        <label class="client-field"><span>Nome completo</span><input id="clientName" name="clientName" type="text" autocomplete="name" minlength="3" required placeholder="Digite seu nome completo" /></label>
         <label class="client-field"><span>E-mail</span><input id="clientEmail" name="clientEmail" type="email" autocomplete="email" required placeholder="voce@email.com" /></label>
       </div>
     </div>`);
@@ -49,29 +48,10 @@ if (orderInput && orderLabel) {
 }
 makeDropzone(document.querySelector('#dropzone'), orderInput, orderLabel);
 if (orderForm && modal) {
-  const cpfInput = document.querySelector('#clientCpf');
-  cpfInput.addEventListener('input', () => {
-    const digits = cpfInput.value.replace(/\D/g, '').slice(0, 11);
-    cpfInput.value = digits.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  });
-  const isValidCpf = (value) => {
-    const cpf = value.replace(/\D/g, '');
-    if (!/^\d{11}$/.test(cpf) || /^(\d)\1{10}$/.test(cpf)) return false;
-    const digit = (length) => {
-      let sum = 0;
-      for (let i = 0; i < length; i += 1) sum += Number(cpf[i]) * (length + 1 - i);
-      const result = (sum * 10) % 11;
-      return result === 10 ? 0 : result;
-    };
-    return digit(9) === Number(cpf[9]) && digit(10) === Number(cpf[10]);
-  };
   orderForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (!orderForm.checkValidity()) { orderForm.reportValidity(); return; }
-    if (!isValidCpf(cpfInput.value)) {
-      cpfInput.setCustomValidity('Informe um CPF válido.');
-      cpfInput.reportValidity();
-      cpfInput.setCustomValidity('');
+    if (!orderForm.checkValidity()) {
+      orderForm.reportValidity();
       return;
     }
     const mapFile = orderInput.files[0];
@@ -95,7 +75,10 @@ if (trialForm && trialFile) {
     event.preventDefault();
     const instruction = document.querySelector('#trialInstructions').value.trim();
     const file = trialFile.files[0];
-    if (!file) { document.querySelector('#trialDropzone').focus(); return; }
+    if (!file) {
+      document.querySelector('#trialDropzone').focus();
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       document.querySelector('#trialFileLabel').textContent = 'Escolha uma imagem de até 5 MB';
       return;
